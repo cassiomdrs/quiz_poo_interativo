@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master POO Quiz | Classe, Atributo, Construtor e Objeto</title>
+    <!-- Tailwind CSS CDN para estilização rápida e responsiva -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonte Inter do Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            900: '#4c1d95',
+                        },
+                        dark: {
+                            bg: '#0f172a',
+                            card: '#1e293b',
+                            border: '#334155'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        /* Estilos personalizados de transição e sombras neon */
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+        }
+        .correct {
+            background-color: #15803d !important; /* verde */
+            border-color: #22c55e !important;
+            color: #ffffff !important;
+        }
+        .incorrect {
+            background-color: #b91c1c !important; /* vermelho */
+            border-color: #ef4444 !important;
+            color: #ffffff !important;
+        }
+        /* Animação suave para troca de perguntas */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between font-sans antialiased p-3 sm:p-6">
+
+    <!-- CABEÇALHO DO QUIZ -->
+    <header class="max-w-2xl w-full mx-auto mb-4 text-center">
+        <h1 class="text-2xl sm:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400">
+            Quiz de POO: Domine os Fundamentos
+        </h1>
+        <p class="text-slate-400 text-xs sm:text-sm mt-1">
+            Testando conhecimentos em Classe, Atributo, Construtor e Objeto
+        </p>
+    </header>
+
+    <!-- CONTAINER PRINCIPAL -->
+    <main class="max-w-2xl w-full mx-auto bg-dark-card border border-dark-border rounded-2xl p-4 sm:p-8 shadow-2xl relative flex-grow flex flex-col justify-between">
+        
+        <!-- TELA DO QUIZ (VISÍVEL POR PADRÃO) -->
+        <div id="quiz-screen" class="flex flex-col h-full justify-between">
+            
+            <!-- Barra de Progresso e Placar -->
+            <div>
+                <div class="flex justify-between items-center text-xs sm:text-sm text-slate-400 font-semibold mb-2">
+                    <span id="question-number">Pergunta 1 de 50</span>
+                    <span id="score-counter" class="text-purple-400">Acertos: 0</span>
+                </div>
+                <!-- Barra visual -->
+                <div class="w-full bg-slate-700/50 rounded-full h-2.5 overflow-hidden mb-6 border border-slate-700">
+                    <div id="progress-bar" class="bg-gradient-to-r from-purple-500 to-indigo-500 h-2.5 rounded-full transition-all duration-300" style="width: 2%;"></div>
+                </div>
+
+                <!-- ENUNCIADO DA PERGUNTA -->
+                <div id="question-container" class="fade-in mb-6">
+                    <h2 id="question-text" class="text-base sm:text-xl font-medium text-slate-100 leading-relaxed mb-3">
+                        Carregando pergunta...
+                    </h2>
+                    <!-- Bloco opcional para trechos de código -->
+                    <div id="code-block-wrapper" class="hidden my-3">
+                        <pre class="bg-slate-900 border border-slate-800 p-3 sm:p-4 rounded-xl text-xs sm:text-sm font-mono text-purple-300 overflow-x-auto"><code id="code-text"></code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ALTERNATIVAS DE RESPOSTA -->
+            <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                <button onclick="checkAnswer('Classe')" class="option-btn bg-slate-800/80 hover:bg-purple-900/40 border border-slate-700 text-slate-200 font-medium py-3.5 px-4 rounded-xl text-sm sm:text-base text-left flex items-center justify-between">
+                    <span>Classe</span>
+                    <span class="text-xs px-2 py-1 rounded bg-slate-700/50 text-slate-400">A</span>
+                </button>
+                <button onclick="checkAnswer('Atributo')" class="option-btn bg-slate-800/80 hover:bg-purple-900/40 border border-slate-700 text-slate-200 font-medium py-3.5 px-4 rounded-xl text-sm sm:text-base text-left flex items-center justify-between">
+                    <span>Atributo</span>
+                    <span class="text-xs px-2 py-1 rounded bg-slate-700/50 text-slate-400">B</span>
+                </button>
+                <button onclick="checkAnswer('Construtor')" class="option-btn bg-slate-800/80 hover:bg-purple-900/40 border border-slate-700 text-slate-200 font-medium py-3.5 px-4 rounded-xl text-sm sm:text-base text-left flex items-center justify-between">
+                    <span>Construtor</span>
+                    <span class="text-xs px-2 py-1 rounded bg-slate-700/50 text-slate-400">C</span>
+                </button>
+                <button onclick="checkAnswer('Objeto')" class="option-btn bg-slate-800/80 hover:bg-purple-900/40 border border-slate-700 text-slate-200 font-medium py-3.5 px-4 rounded-xl text-sm sm:text-base text-left flex items-center justify-between">
+                    <span>Objeto</span>
+                    <span class="text-xs px-2 py-1 rounded bg-slate-700/50 text-slate-400">D</span>
+                </button>
+            </div>
+
+            <!-- BOTÃO AVANÇAR -->
+            <div class="flex justify-end pt-2 border-t border-slate-800">
+                <button id="next-btn" onclick="nextQuestion()" disabled class="bg-slate-700 opacity-50 cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 text-sm sm:text-base flex items-center gap-2">
+                    <span>Próxima Pergunta</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- TELA DE RESULTADO (OCULTA INICIALMENTE) -->
+        <div id="result-screen" class="hidden flex-col items-center justify-center text-center py-6 fade-in">
+            <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-purple-500/30 flex items-center justify-center bg-purple-950/40 mb-6 shadow-inner">
+                <span id="final-percentage" class="text-2xl sm:text-4xl font-extrabold text-purple-400">0%</span>
+            </div>
+
+            <h2 id="result-title" class="text-2xl sm:text-3xl font-bold mb-2 text-white">Resultado Final</h2>
+            <p id="result-message" class="text-slate-400 text-sm sm:text-base max-w-md mb-6">
+                Você concluiu todas as 50 perguntas sobre Orientação a Objetos.
+            </p>
+
+            <div class="grid grid-cols-2 gap-4 w-full max-w-xs mb-8">
+                <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700">
+                    <span class="block text-slate-400 text-xs">Acertos</span>
+                    <span id="total-correct" class="text-2xl font-bold text-green-400">0</span>
+                </div>
+                <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700">
+                    <span class="block text-slate-400 text-xs">Erros</span>
+                    <span id="total-incorrect" class="text-2xl font-bold text-red-400">0</span>
+                </div>
+            </div>
+
+            <button onclick="restartQuiz()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-purple-900/40 transition-all text-sm sm:text-base">
+                Refazer Quiz
+            </button>
+        </div>
+
+    </main>
+
+    <!-- RODAPÉ -->
+    <footer class="max-w-2xl w-full mx-auto mt-4 text-center text-xs text-slate-500">
+        Desenvolvido por Cássio Medeiros para fins didáticos &bull; Programação Orientada a Objetos
+    </footer>
+
+    <!-- BANCO DE DADOS DAS PERGUNTAS E LÓGICA EM JAVASCRIPT -->
+    <script>
+        // Array com 50 perguntas diversificadas cobrindo apenas: Classe, Atributo, Construtor e Objeto
+        const questions = [
+            {
+                text: "Em um sistema bancário, o documento técnico especifica que todas as contas devem guardar o 'número da conta', 'saldo' e 'titular'. O que representa essa lista de dados?",
+                correct: "Atributo"
+            },
+            {
+                text: "Uma empreiteira possui uma planta baixa detalhada no papel para construir casas populares de 60m². Essa planta serve de molde para construir 50 casas idênticas. A planta baixa é uma metáfora para:",
+                correct: "Classe"
+            },
+            {
+                text: "Quando você estaciona um carro real (placa ABC-1234, cor preta, modelo 2022) em uma vaga de shopping, você está lidando com um(a):",
+                correct: "Objeto"
+            },
+            {
+                text: "Qual elemento dentro de uma classe é executado automaticamente no exato momento em que usamos a instrução 'new' em linguagens como Java?",
+                correct: "Construtor"
+            },
+            {
+                text: "Analise o código abaixo. O que a palavra 'ContaBancaria' representa no início da declaração?",
+                code: "public class ContaBancaria {\n    double saldo;\n}",
+                correct: "Classe"
+            },
+            {
+                text: "Na linha de código: 'Carro meuCarro = new Carro();', a variável 'meuCarro' armazena a referência para um(a):",
+                correct: "Objeto"
+            },
+            {
+                text: "O trecho de código abaixo tem o mesmo nome da classe e não possui tipo de retorno. O que ele é?",
+                code: "public Pessoa(String nome, int idade) {\n    this.nome = nome;\n    this.idade = idade;\n}",
+                correct: "Construtor"
+            },
+            {
+                text: "Em um jogo de RPG, a 'energia', o 'nível' e a 'força' de um guerreiro correspondem ao seu:",
+                correct: "Atributo"
+            },
+            {
+                text: "Em um e-commerce, o botão 'Comprar' gera uma nota fiscal com dados reais de compra gravados no banco. Essa nota fiscal individual emitida na memória é um(a):",
+                correct: "Objeto"
+            },
+            {
+                text: "Se dizemos que a abstração de 'Cachorro' define que todo cachorro possui raça, peso e idade, o que é o 'Cachorro' nesse contexto de modelagem?",
+                correct: "Classe"
+            },
+            {
+                text: "Qual recurso garante que um objeto recém-criado não fique com seus dados obrigatórios vazios ou nulos na memória?",
+                correct: "Construtor"
+            },
+            {
+                text: "Observando o código abaixo, o que o campo 'private double preco;' representa dentro da estrutura?",
+                code: "public class Produto {\n    private double preco;\n}",
+                correct: "Atributo"
+            },
+            {
+                text: "Qual estrutura fica alocada na memória Heap durante a execução de um programa Java após ser instanciada com 'new'?",
+                correct: "Objeto"
+            },
+            {
+                text: "No desenvolvimento de software, é o arquivo de código (.java, .js, .cpp) que atua como o blueprint/projeto estrutural de um componente.",
+                correct: "Classe"
+            },
+            {
+                text: "Ao criar um cadastro de alunos, a propriedade 'matricula' declarada na classe Aluno é um:",
+                correct: "Atributo"
+            },
+            {
+                text: "O trecho 'new Smartphone(\"Samsung\", \"S23\");' está chamando diretamente qual componente para inicializar o aparelho?",
+                correct: "Construtor"
+            },
+            {
+                text: "Um arquivo PDF aberto na tela do seu computador com dados específicos preenchidos representa um(a):",
+                correct: "Objeto"
+            },
+            {
+                text: "Qual elemento é responsável por copiar os parâmetros recebidos na chamada da fábrica e atribuí-los às variáveis internas da instância?",
+                correct: "Construtor"
+            },
+            {
+                text: "Se você abrir 3 abas diferentes do navegador Chrome, cada aba aberta consome memória e funciona de forma independente. Cada aba é um(a):",
+                correct: "Objeto"
+            },
+            {
+                text: "Desejamos representar no software a ideia geral de um 'Funcionario'. Como chamamos a estrutura de código que agrupa as regras desse Funcionario?",
+                correct: "Classe"
+            },
+            {
+                text: "No código 'String marca = \"Nike\";' dentro de uma classe Tenis, 'marca' é um:",
+                correct: "Atributo"
+            },
+            {
+                text: "O que é invocado apenas UMA única vez durante o ciclo de vida de um objeto, logo no momento em que ele é gerado?",
+                correct: "Construtor"
+            },
+            {
+                text: "O molde de um bolo de silicone determina o formato de estrela. As dezenas de bolos assados usando esse molde são exemplares de:",
+                correct: "Objeto"
+            },
+            {
+                text: "A especificação visual das propriedades de uma tabela em um banco de dados relacional se assemelha muito ao conceito de:",
+                correct: "Classe"
+            },
+            {
+                text: "Ao definir 'boolean estaLigado;' no topo de uma classe referente a um Eletrodomestico, 'estaLigado' é considerado um:",
+                correct: "Atributo"
+            },
+            {
+                text: "Em JavaScript, o método especial declarado dentro da classe com o nome 'constructor()' representa o:",
+                correct: "Construtor"
+            },
+            {
+                text: "Quando clicamos no botão 'Criar Novo Usuário' e o sistema gera uma nova entidade viva no servidor, criamos um novo:",
+                correct: "Objeto"
+            },
+            {
+                text: "A representação genérica do formulário em branco que define quais campos devem ser preenchidos por qualquer cliente é uma:",
+                correct: "Classe"
+            },
+            {
+                text: "No código abaixo, o que o termo 'this.placa = placa;' dentro do bloco de código busca preencher?",
+                code: "public Veiculo(String placa) {\n    this.placa = placa;\n}",
+                correct: "Atributo"
+            },
+            {
+                text: "Se uma classe não declarar explicitamente nenhum método de inicialização, o compilador criará automaticamente um default sem argumentos. Trata-se de um:",
+                correct: "Construtor"
+            },
+            {
+                text: "Dois jogadores entram no mesmo servidor de jogo. O Jogador 1 tem 100 de vida e o Jogador 2 tem 45 de vida. O personagem do Jogador 1 é um:",
+                correct: "Objeto"
+            },
+            {
+                text: "A declaração 'public class Livro { }' representa a criação de uma:",
+                correct: "Classe"
+            },
+            {
+                text: "Em um software hospitalar, 'tipoSanguineo' e 'pressaoArterial' associados ao prontuário são exemplos de:",
+                correct: "Atributo"
+            },
+            {
+                text: "Qual bloco de código obriga o programador a passar os argumentos mínimos para criar um item válido na aplicação?",
+                correct: "Construtor"
+            },
+            {
+                text: "O cursor de mouse na tela com posição X=450 e Y=300 em um determinado instante é a instância atual de um:",
+                correct: "Objeto"
+            },
+            {
+                text: "Qual conceito em POO é comparável ao gabarito de corte de uma fábrica de roupas?",
+                correct: "Classe"
+            },
+            {
+                text: "Ao criar um aplicativo de música, as informações 'tituloMusica', 'artista' e 'duracao' pertencem à categoria de:",
+                correct: "Atributo"
+            },
+            {
+                text: "Qual elemento possui exatamente a mesma assinatura/nome da classe onde ele está contido em linguagens como C++ e Java?",
+                correct: "Construtor"
+            },
+            {
+                text: "Um Pix realizado no valor de R$ 50,00 da conta X para a conta Y às 14:00 é uma ocorrência real de um:",
+                correct: "Objeto"
+            },
+            {
+                text: "Dizemos que uma aplicação orientada a objetos é formada por várias dessas estruturas estáticas digitadas pelos desenvolvedores antes de compilar.",
+                correct: "Classe"
+            },
+            {
+                text: "Em um aplicativo de GPS, a 'latitude' e a 'longitude' salvas em uma localização são exemplos de:",
+                correct: "Atributo"
+            },
+            {
+                text: "Qual dos pilares é acionado quando escrevemos 'new Scanner(System.in);' em um programa Java?",
+                correct: "Construtor"
+            },
+            {
+                text: "O arquivo fisicamente armazenado na memória RAM que é limpo pelo Garbage Collector quando ninguém mais o utiliza é o:",
+                correct: "Objeto"
+            },
+            {
+                text: "Em um sistema de biblioteca, a definição que todo exemplar possui código de barras, editora e ano de publicação é a:",
+                correct: "Classe"
+            },
+            {
+                text: "As variáveis de escopo global dentro de uma classe que armazenam o estado interno das suas instâncias são chamadas de:",
+                correct: "Atributo"
+            },
+            {
+                text: "O mecanismo que pode ser sobrecarregado (Overloading) para permitir a criação de entidades com diferentes combinações de dados iniciais é o:",
+                correct: "Construtor"
+            },
+            {
+                text: "O sensor de temperatura enviando a leitura atual de '32.5 °C' para o servidor criou um pacote de dados encapsulado em um:",
+                correct: "Objeto"
+            },
+            {
+                text: "Para criar um novo tipo de dado personalizado em uma linguagem de programação orientada a objetos, declaramos uma:",
+                correct: "Classe"
+            },
+            {
+                text: "Ao declarar 'private String email;' dentro da estrutura de um Usuário, o campo 'email' é um:",
+                correct: "Atributo"
+            },
+            {
+                text: "A instrução responsável por alocar espaço na memória e executar o procedimento de setup do novo item é o:",
+                correct: "Construtor"
+            }
+        ];
+
+        // VARIÁVEIS DE ESTADO DO QUIZ
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedAnswer = false;
+        let shuffledQuestions = [];
+
+        // ELEMENTOS DO DOM
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const questionNumberEl = document.getElementById('question-number');
+        const scoreCounterEl = document.getElementById('score-counter');
+        const progressBarEl = document.getElementById('progress-bar');
+        const questionTextEl = document.getElementById('question-text');
+        const codeBlockWrapperEl = document.getElementById('code-block-wrapper');
+        const codeTextEl = document.getElementById('code-text');
+        const optionsContainerEl = document.getElementById('options-container');
+        const nextBtnEl = document.getElementById('next-btn');
+
+        // FUNÇÃO PARA EMBARALHAR ARRAYS (ALGORITMO FISHER-YATES)
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // INICIALIZAÇÃO DO QUIZ NA CARGA DA PÁGINA
+        window.onload = () => {
+            shuffledQuestions = shuffleArray(questions);
+            loadQuestion();
+        };
+
+        // CARREGA A PERGUNTA ATUAL
+        function loadQuestion() {
+            selectedAnswer = false;
+            const q = shuffledQuestions[currentQuestionIndex];
+
+            // Atualiza barra e contadores
+            questionNumberEl.textContent = `Pergunta ${currentQuestionIndex + 1} de ${shuffledQuestions.length}`;
+            scoreCounterEl.textContent = `Acertos: ${score}`;
+            const progressPercent = ((currentQuestionIndex + 1) / shuffledQuestions.length) * 100;
+            progressBarEl.style.width = `${progressPercent}%`;
+
+            // Atualiza enunciado
+            questionTextEl.textContent = q.text;
+
+            // Verifica se a pergunta possui bloco de código
+            if (q.code) {
+                codeTextEl.textContent = q.code;
+                codeBlockWrapperEl.classList.remove('hidden');
+            } else {
+                codeBlockWrapperEl.classList.add('hidden');
+            }
+
+            // Reseta estilo dos botões das opções
+            const buttons = optionsContainerEl.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.disabled = false;
+                btn.className = "option-btn bg-slate-800/80 hover:bg-purple-900/40 border border-slate-700 text-slate-200 font-medium py-3.5 px-4 rounded-xl text-sm sm:text-base text-left flex items-center justify-between";
+            });
+
+            // Desabilita botão "Próxima Pergunta" até que o usuário escolha uma opção
+            nextBtnEl.disabled = true;
+            nextBtnEl.className = "bg-slate-700 opacity-50 cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 text-sm sm:text-base flex items-center gap-2";
+        }
+
+        // CHECA A RESPOSTA CLICADA PELO USUÁRIO
+        function checkAnswer(chosenOption) {
+            if (selectedAnswer) return; // Impede múltiplos cliques na mesma pergunta
+            selectedAnswer = true;
+
+            const q = shuffledQuestions[currentQuestionIndex];
+            const buttons = optionsContainerEl.querySelectorAll('button');
+
+            buttons.forEach(btn => {
+                btn.disabled = true; // Desabilita todos os botões após responder
+                const optionText = btn.querySelector('span').textContent;
+
+                // Destaca a resposta correta em verde
+                if (optionText === q.correct) {
+                    btn.classList.remove('bg-slate-800/80', 'border-slate-700');
+                    btn.classList.add('correct');
+                }
+                
+                // Destaca a opção clicada pelo usuário em vermelho se estiver errada
+                if (optionText === chosenOption && chosenOption !== q.correct) {
+                    btn.classList.remove('bg-slate-800/80', 'border-slate-700');
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            // Se acertou, incrementa o placar
+            if (chosenOption === q.correct) {
+                score++;
+                scoreCounterEl.textContent = `Acertos: ${score}`;
+            }
+
+            // Libera o botão "Próxima Pergunta"
+            nextBtnEl.disabled = false;
+            nextBtnEl.className = "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold py-3 px-6 rounded-xl shadow-lg shadow-purple-900/30 cursor-pointer transition-all duration-200 text-sm sm:text-base flex items-center gap-2";
+        }
+
+        // AVANÇA PARA A PRÓXIMA PERGUNTA OU EXIBE A TELA FINAL
+        function nextQuestion() {
+            if (currentQuestionIndex < shuffledQuestions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        // EXIBE A TELA DE RESULTADOS FINAIS
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+
+            const percentage = Math.round((score / shuffledQuestions.length) * 100);
+            document.getElementById('final-percentage').textContent = `${percentage}%`;
+            document.getElementById('total-correct').textContent = score;
+            document.getElementById('total-incorrect').textContent = shuffledQuestions.length - score;
+
+            // Mensagem personalizada conforme a nota
+            const titleEl = document.getElementById('result-title');
+            const messageEl = document.getElementById('result-message');
+
+            if (percentage >= 80) {
+                titleEl.textContent = "Excelente Trabalho! 🚀";
+                messageEl.textContent = "Você demonstrou domínio completo dos conceitos fundamentais de Classe, Atributo, Construtor e Objeto!";
+            } else if (percentage >= 50) {
+                titleEl.textContent = "Bom Desempenho! 👍";
+                messageEl.textContent = "Você compreendeu a maior parte dos conceitos, mas vale a pena revisar alguns pontos para fixar 100%.";
+            } else {
+                titleEl.textContent = "Precisa Praticar Mais 📚";
+                messageEl.textContent = "Não desanime! Revise o material didático sobre POO e tente novamente para reforçar seu aprendizado.";
+            }
+        }
+
+        // REINICIA O QUIZ DO ZERO
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            shuffledQuestions = shuffleArray(questions); // Re-embaralha para a próxima tentativa
+            resultScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            loadQuestion();
+        }
+    </script>
+</body>
+</html>
